@@ -1,0 +1,10 @@
+tsk_1	BFS
+tsk_2	BFS
+tsk_3	BFS
+tsk_4	BFS
+tsk_5	BFS
+tsk_6	BFS
+tsk_7	BFS
+tsk_8	BFS
+tsk_9	BFS
+tsk_10	BFS
