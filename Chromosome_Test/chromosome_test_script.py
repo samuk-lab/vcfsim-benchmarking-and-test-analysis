@@ -9,10 +9,10 @@ def run_simulations(starting_seed, ending_seed):
         f.write('pop\tchromosome\twindow_pos_1\twindow_pos_2\tavg_pi\tno_sites\tcount_diffs\tcount_comparisons\tcount_missing\n')
 
     for i in range(starting_seed, ending_seed):
-        vcfsim_prompt = f'vcfsim --seed {i} --percent_missing_sites 0 --percent_missing_genotypes 0 --output_file mychrom.vcf --sample_size 10 --param_file chrom.txt'
-        bgzip_prompt = 'bgzip mychrom.vcf'
-        tabix_prompt = 'tabix mychrom.vcf.gz'
-        pixy_prompt = 'pixy --stats pi --vcf mychrom.vcf.gz --populations populations.txt --window_size 10000 --n_cores 2'
+        vcfsim_prompt = f'python3 __main__.py --seed {i} --percent_missing_sites 0 --percent_missing_genotypes 0 --output_file mychrom.vcf --sample_size 10 --param_file chrom.txt'
+        bgzip_prompt = 'bgzip -f mychrom.vcf'
+        tabix_prompt = 'tabix -f mychrom.vcf.gz'
+        pixy_prompt = 'pixy --stats pi --vcf mychrom.vcf.gz --populations populations.txt --window_size 10000 --n_cores 2 --output_folder . --output_prefix pixy'
 
         os.system(vcfsim_prompt)
         os.system(bgzip_prompt)
