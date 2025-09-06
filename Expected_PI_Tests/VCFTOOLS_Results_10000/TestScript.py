@@ -5,7 +5,7 @@ import pandas as pd
 
 def RunVCFSim(seed):
     seedprompt = str(seed)
-    prompt = 'python3 __main__.py --chromosome 1 --replicates 1 --seed ' + seedprompt + ' --sequence_length 10000 --ploidy 2 --Ne 1700000 --mu 1e-7 --percent_missing_sites 0 --percent_missing_genotypes 0 --output_file VCFsim  --sample_size 10'
+    prompt = 'vcfsim --chromosome 1 --replicates 1 --seed ' + seedprompt + ' --sequence_length 10000 --ploidy 2 --Ne 1700000 --mu 1e-7 --percent_missing_sites 0 --percent_missing_genotypes 0 --output_file VCFsim  --sample_size 10'
     os.system(prompt)
 
 def RunVCFSimPixy(seed):
