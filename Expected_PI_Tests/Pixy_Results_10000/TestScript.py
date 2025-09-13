@@ -12,7 +12,7 @@ def RunVCFSimPixy(seed):
     vcfsim = 'VCFsim' + str(seed) + '.vcf'
     vcfsimprompt1 = 'bgzip -f ' + vcfsim
     vcfsimprompt2 = 'tabix -f ' + vcfsim + '.gz' 
-    vcfsimprompt3 = 'pixy --stats pi --populations populations.txt --vcf ' + vcfsim + '.gz --window_size 10000 --n_cores 2 --output_folder . --output_prefix pixy'
+    vcfsimprompt3 = 'pixy --stats pi --populations populations.txt --vcf ' + vcfsim + '.gz --include_multiallelic_snps --window_size 10000 --n_cores 2 --output_folder . --output_prefix pixy'
     os.system(vcfsimprompt1)
     os.system(vcfsimprompt2)
     os.system(vcfsimprompt3)
