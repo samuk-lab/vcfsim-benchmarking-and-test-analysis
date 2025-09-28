@@ -43,26 +43,25 @@ pixy_to_long <- function(pixy_files){
 pixy_files <- c("pixy_pi.txt")
 
 result_df <- pixy_to_long(pixy_files)
+View(result_df)
 
-# Define the plot labels
+
 pixy_labeller <- as_labeller(c(avg_pi = "pi",
                                avg_dxy = "D[XY]",
                                avg_wc_fst = "F[ST]"),
                              default = label_parsed)
-new_chrom <- data.frame(chromosome = c("X","Y","A","B"), new_chromosome = c("I", "II", "III", "Y"))
 
-exp_pi <- 4*1e6*1e-8
-
-plot_2c <- result_df %>%
-  left_join(new_chrom) %>%
-  mutate(chromosome = new_chromosome) %>%
-  mutate(chromosome = factor(chromosome, levels = c(1:22, "I", "II", "III", "Y"))) %>%
+# Plotting code using pixy_df
+result_df %>%
+  mutate(chrom_color_group = case_when(as.numeric(chromosome) %% 2 != 0 ~ "even",
+                                       chromosome == "X" ~ "even",
+                                       TRUE ~ "odd")) %>%
+  mutate(chromosome = factor(chromosome, levels = c(1:22, "X", "Y", "A", "B"))) %>%
+  #filter(statistic %in% c("avg_pi", "avg_dxy", "avg_wc_fst")) %>%
   filter(statistic == "avg_pi") %>%
-  ggplot(aes(x = chromosome, y = value)) +
-  geom_jitter(width = 0.05)+
-  stat_summary(fun = mean, geom = "errorbar", aes(ymax = ..y.., ymin = ..y..),
-               width = 0.25, size = 2) +
-  geom_hline(yintercept = exp_pi) +
+  ggplot(aes(x = chromosome, y = value, color = chrom_color_group)) +
+  stat_summary(fun = mean, geom = "point")+
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2)+
   xlab("Chromosome") +
   ylab("Statistic Value") +
   scale_color_manual(values = c("black", "black")) +
@@ -70,7 +69,4 @@ plot_2c <- result_df %>%
   theme(panel.spacing = unit(0.1, "cm"),
         strip.background = element_blank(),
         strip.placement = "outside",
-        legend.position = "none",
-        text = element_text(size = 20))
-
-print(plot_2c)
+        legend.position = "none") 

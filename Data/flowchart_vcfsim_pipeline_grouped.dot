@@ -1,0 +1,112 @@
+
+digraph msprime_pipeline {
+  graph [rankdir=TB, fontname="Arial", labelloc=t, compound=true];
+  node  [fontname="Arial", shape=box, style="rounded,filled", color="lightgray"];
+  edge  [fontname="Arial"];
+
+  // ================== Inputs & setup ==================
+  subgraph cluster_inputs {
+    label = "Inputs & setup";
+    style = "filled,rounded";
+    color = "#c6e2ff";
+    fillcolor = "#eef5ff";
+
+    A [label="Parse CLI args", fillcolor="#c6e2ff"];
+    B [label="Validate & normalize config", fillcolor="#c6e2ff"];
+    C [label="Build run config (seed, μ, r, seq length, ploidy, samples)", fillcolor="#c6e2ff"];
+  }
+
+  // ================== Demography ==================
+  subgraph cluster_demo {
+    label = "Demography";
+    style = "filled,rounded";
+    color = "#ffe4c4";
+    fillcolor = "#fff3e6";
+
+    D [label="Demography: one population", fillcolor="#ffe4c4"];
+    E [label="Demography: two populations (split time, migration, sizes)", fillcolor="#ffe4c4"];
+  }
+
+  // ================== Per-chromosome loop ==================
+  subgraph cluster_chr {
+    label = "Per-chromosome loop";
+    style = "dashed,rounded";
+    color = "gray";
+    fillcolor = "white";
+
+    F [label="Init per-chr params
+(length, recomb map, label)", fillcolor="#fffacd"];
+    G [label="msprime.sim_ancestry()
+(samples = n_individuals × ploidy,
+demography = D/E, recombination = r)", fillcolor="#fffacd"];
+    H [label="msprime.sim_mutations()
+(rate = μ, model = JC69/HKY)", fillcolor="#fffacd"];
+    I [label="VCF (segregating sites only)
+(per chromosome)", fillcolor="#fffacd"];
+
+    F -> G -> H -> I;
+  }
+
+  // ================== Optional concatenation ==================
+  subgraph cluster_optional {
+    label = "Optional concatenation";
+    style = "filled,rounded";
+    color = "#faf0e6";
+    fillcolor = "#fff8f0";
+
+    K [label="More chromosomes?", shape=diamond, style="filled", fillcolor="#faf0e6"];
+    L [label="Concatenate VCFs across chr?", shape=diamond, style="filled", fillcolor="#faf0e6"];
+    N [label="Concatenate per-chr VCFs
+(bcftools concat; complete ##contig)", fillcolor="#faf0e6"];
+    M [label="Working VCF (single chr)", fillcolor="#e6e6fa"];
+  }
+
+  // ================== Post-processing ==================
+  subgraph cluster_post {
+    label = "Post-processing";
+    style = "filled,rounded";
+    color = "#e6e6fa";
+    fillcolor = "#f7f7ff";
+
+    O [label="Add invariant sites (optional):
+emit monomorphic records or REF blocks", fillcolor="#e6e6fa"];
+    P [label="Normalize & index (bcftools norm + tabix)", fillcolor="#e6e6fa"];
+    Q [label="Inject missing data:
+site masking (BED/proportion), per-sample dropouts,
+blocky MNAR patterns", fillcolor="#e6e6fa"];
+    R [label="Update INFO/FORMAT if needed (AC/AN, DP, GQ, GT)", fillcolor="#e6e6fa"];
+  }
+
+  // ================== Outputs ==================
+  subgraph cluster_outputs {
+    label = "Outputs";
+    style = "filled,rounded";
+    color = "#98fb98";
+    fillcolor = "#effff0";
+
+    S [label="Final VCF/BCF + index (.vcf.gz/.bcf + .tbi/.csi)", shape=ellipse, style="filled", fillcolor="#98fb98"];
+    T [label="QC report (optional): SFS, π, r² decay, missingness", fillcolor="#f2f2f2"];
+  }
+
+  // ================== Edges across clusters ==================
+  A -> B -> C;
+  C -> D;
+  C -> E;
+  D -> F;
+  E -> F;
+
+  I -> K;
+  K -> F  [label="Yes"];
+  K -> L  [label="No"];
+
+  L -> M  [label="No"];
+  L -> N  [label="Yes"];
+
+  M -> O;
+  N -> O;
+  O -> P -> Q -> R -> S -> T;
+
+  // Nicely align D and E on same rank
+  {rank=same; D; E;}
+}
+
